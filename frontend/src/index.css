@@ -1,0 +1,213 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  background-color: #0e1420;
+  background-image: radial-gradient(circle at 20% -10%, #1a2338 0%, #0e1420 55%);
+  color: #edeff3;
+}
+
+h1, h2, h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+input, select {
+  background-color: #1e2738;
+  color: #edeff3;
+  border: 1px solid #2a3348;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 11px 14px;
+}
+
+input:focus, select:focus {
+  border-color: #f2a33c;
+  box-shadow: 0 0 0 3px rgba(242, 163, 60, 0.15);
+}
+
+button {
+  background-color: #f2a33c;
+  color: #0e1420;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+  padding: 11px 20px;
+}
+
+button:hover {
+  background-color: #ffb85c;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  background-color: #3a3f4a;
+  color: #7a8090;
+  cursor: not-allowed;
+}
+
+a {
+  color: #f2a33c;
+}
+
+.page-container {
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 0 16px 60px 16px;
+}
+
+.card {
+  background-color: #161d2b;
+  border: 1px solid #262f42;
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.error-text {
+  color: #ff6b5c;
+  font-size: 14px;
+}
+
+.group-card {
+  background-color: #161d2b;
+  border: 1px solid #262f42;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+  border-left: 3px solid #f2a33c;
+}
+
+.group-card:hover {
+  border-color: #f2a33c;
+  transform: translateY(-2px);
+}
+
+.list-item {
+  background-color: #161d2b;
+  border: 1px solid #262f42;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.budget-card-over {
+  background-color: #24151a;
+  border: 1px solid #ff6b5c;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.budget-card-under {
+  background-color: #12241f;
+  border: 1px solid #29b6a6;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.login-container {
+  max-width: 380px;
+  margin: 110px auto;
+  padding: 0 16px;
+}
+
+.link-button {
+  background: none;
+  color: #f2a33c;
+  padding: 0;
+  font-weight: 700;
+}
+
+.link-button:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+/* Boarding-pass style ticket for settlement plan */
+.ticket {
+  position: relative;
+  background: linear-gradient(135deg, #1c2740 0%, #161d2b 100%);
+  border: 1px solid #29b6a6;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ticket::before,
+.ticket::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #0e1420;
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ticket::before {
+  left: -9px;
+}
+
+.ticket::after {
+  right: -9px;
+}
+
+.ticket-route {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+}
+
+.ticket-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ticket-divider {
+  flex: 1;
+  border-top: 2px dashed #3a4560;
+  min-width: 20px;
+}
+
+.ticket-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 18px;
+  color: #29b6a6;
+  padding-left: 16px;
+  border-left: 1px dashed #3a4560;
+  margin-left: 16px;
+}
