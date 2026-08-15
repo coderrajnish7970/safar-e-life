@@ -21,12 +21,16 @@ app.use(
 );
 app.use(express.json());
 
+const MONGO_URI =
+  process.env.MONGO_URI ||
+  "mongodb://singhrajnish7970_db_user:splitsmart123@ac-dkgyga2-shard-00-00.pwhhqde.mongodb.net:27017,ac-dkgyga2-shard-00-01.pwhhqde.mongodb.net:27017,ac-dkgyga2-shard-00-02.pwhhqde.mongodb.net:27017/splitsmart?ssl=true&replicaSet=atlas-p7ruqi-shard-0&authSource=admin&appName=Cluster0";
+
 // Serverless DB Connection Middleware
 let isConnected = false;
 const connectDB = async () => {
   if (isConnected && mongoose.connection.readyState === 1) return;
   try {
-    const db = await mongoose.connect(process.env.MONGO_URI);
+    const db = await mongoose.connect(MONGO_URI);
     isConnected = db.connections[0].readyState === 1;
     console.log("MongoDB connected successfully");
   } catch (err) {

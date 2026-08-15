@@ -55,7 +55,8 @@ router.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+    const jwtSecret = process.env.JWT_SECRET || "splitsmart_super_secret_key_change_later";
+    const token = jwt.sign({ userId: newUser._id }, jwtSecret, {
       expiresIn: "7d",
     });
 
@@ -88,7 +89,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const jwtSecret = process.env.JWT_SECRET || "splitsmart_super_secret_key_change_later";
+    const token = jwt.sign({ userId: user._id }, jwtSecret, {
       expiresIn: "7d",
     });
 
