@@ -5,6 +5,7 @@ const User = require("../models/User");
 const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
 router.get("/find", protect, async (req, res) => {
   try {
     const email = req.query.email;
@@ -28,34 +29,42 @@ router.get("/find", protect, async (req, res) => {
 // SIGNUP
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    const emailTrimmed = String(email).trim().toLowerCase();
     const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(email.trim())) {
-      return res.status(400).json({ message: "Please provide a valid email address" });
+    if (!emailRegex.test(emailTrimmed)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address (e.g. name@gmail.com)",
+      });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: emailTrimmed });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({
+        message: "Email already registered. Please sign in instead.",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: emailTrimmed,
       password: hashedPassword,
     });
 
-    const jwtSecret = process.env.JWT_SECRET || "splitsmart_super_secret_key_change_later";
+    const jwtSecret =
+      process.env.JWT_SECRET || "splitsmart_super_secret_key_change_later";
     const token = jwt.sign({ userId: newUser._id }, jwtSecret, {
       expiresIn: "7d",
     });
@@ -66,20 +75,22 @@ router.post("/signup", async (req, res) => {
       user: { id: newUser._id, name: newUser.name, email: newUser.email },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(400).json({ message: err.message || "Could not create account" });
   }
 });
 
 // LOGIN
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email });
+    const emailTrimmed = String(email).trim().toLowerCase();
+
+    const user = await User.findOne({ email: emailTrimmed });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -89,7 +100,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || "splitsmart_super_secret_key_change_later";
+    const jwtSecret =
+      process.env.JWT_SECRET || "splitsmart_super_secret_key_change_later";
     const token = jwt.sign({ userId: user._id }, jwtSecret, {
       expiresIn: "7d",
     });
@@ -100,7 +112,7 @@ router.post("/login", async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(400).json({ message: err.message || "Could not log in" });
   }
 });
 

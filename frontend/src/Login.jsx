@@ -41,6 +41,7 @@ function Login() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
+        err.response?.data?.error ||
         err.message ||
         "Connection error. Please try again."
       );
