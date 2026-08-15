@@ -6,7 +6,17 @@ const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({
+  dest: "uploads/",
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -19,7 +29,7 @@ router.post("/scan", protect, upload.single("receipt"), async (req, res) => {
     const imageBuffer = fs.readFileSync(req.file.path);
     const imageBase64 = imageBuffer.toString("base64");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt =
       "Look at this receipt image. Extract the following fields and respond ONLY with valid JSON, no markdown, no explanation: " +
@@ -51,12 +61,18 @@ router.post("/scan", protect, upload.single("receipt"), async (req, res) => {
       });
     }
 
-    fs.unlinkSync(req.file.path);
-
     res.json({ extracted: parsed });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
+  } finally {
+    if (req.file && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (cleanupErr) {
+        console.error("Failed to delete temp file:", cleanupErr);
+      }
+    }
   }
 });
 
-module.exports = router;
+module.exports = router;

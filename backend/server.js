@@ -8,13 +8,15 @@ const expenseRoutes = require("./routes/expenseRoutes");
 const receiptRoutes = require("./routes/receiptRoutes");
 const destinationRoutes = require("./routes/destinationRoutes");
 
+const errorHandler = require("./middleware/errorHandler");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ message: "SplitSmart AI backend is running" });
+  res.json({ message: "🌴 सफ़र-ए-Life backend is running" });
 });
 
 app.use("/api/auth", authRoutes);
@@ -22,6 +24,8 @@ app.use("/api/groups", groupRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/receipts", receiptRoutes);
 app.use("/api/destinations", destinationRoutes);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

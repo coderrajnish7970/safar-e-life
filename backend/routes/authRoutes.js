@@ -5,6 +5,25 @@ const User = require("../models/User");
 const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
+router.get("/find", protect, async (req, res) => {
+  try {
+    const email = req.query.email;
+
+    if (!email) {
+      return res.status(400).json({ message: "email query param is required" });
+    }
+
+    const user = await User.findOne({ email: email }).select("_id name email");
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found with that email" });
+    }
+
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
 
 // SIGNUP
 router.post("/signup", async (req, res) => {
@@ -13,6 +32,15 @@ router.post("/signup", async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({ message: "Please provide a valid email address" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
     }
 
     const existingUser = await User.findOne({ email });
