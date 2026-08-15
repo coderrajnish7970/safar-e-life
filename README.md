@@ -2,6 +2,8 @@
 
 > **AI-Assisted Group Travel & Financial Management Platform**
 > 
+> 🌐 **Live Web Application**: [https://safar-e-life.vercel.app](https://safar-e-life.vercel.app/)
+> 
 > *Destination Discovery → Trip Planning → Collaborative Expense Management → Deterministic Remainder Splitting → Receipt Vision Scanning → Debt Settlement Lifecycle*
 
 ---
