@@ -39,15 +39,15 @@ app.use(async (req, res, next) => {
   next();
 });
 
-app.get("/api/health", (req, res) => {
+app.get(["/api/health", "/health", "/"], (req, res) => {
   res.json({ status: "ok", message: "🌴 Safar-E-Life backend is live" });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/groups", groupRoutes);
-app.use("/api/expenses", expenseRoutes);
-app.use("/api/receipts", receiptRoutes);
-app.use("/api/destinations", destinationRoutes);
+app.use(["/api/auth", "/auth"], authRoutes);
+app.use(["/api/groups", "/groups"], groupRoutes);
+app.use(["/api/expenses", "/expenses"], expenseRoutes);
+app.use(["/api/receipts", "/receipts"], receiptRoutes);
+app.use(["/api/destinations", "/destinations"], destinationRoutes);
 
 app.use(errorHandler);
 
