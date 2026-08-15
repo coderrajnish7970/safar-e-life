@@ -1,9 +1,10 @@
 import axios from "axios";
 
+// Always use relative /api in production on Vercel so mobile requests route to the live Vercel backend serverless function
 const API = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_URL ||
-    (import.meta.env.PROD ? "/api" : "http://localhost:5000/api"),
+  baseURL: import.meta.env.PROD
+    ? "/api"
+    : import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
 API.interceptors.request.use((config) => {
@@ -28,4 +29,4 @@ API.interceptors.response.use(
   }
 );
 
-export default API;
+export default API;
