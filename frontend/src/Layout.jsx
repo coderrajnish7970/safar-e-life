@@ -46,6 +46,16 @@ function Layout({ children }) {
       path: "/create-trip",
       icon: "➕",
     },
+    {
+      label: "Account Profile",
+      path: "/account",
+      icon: "👤",
+    },
+    {
+      label: "Settings & Specs",
+      path: "/settings",
+      icon: "⚙️",
+    },
   ];
 
   return (

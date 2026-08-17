@@ -11,6 +11,8 @@ import GroupDetail from "./GroupDetail";
 import TripPlanner from "./TripPlanner";
 import KnowYourDestination from "./KnowYourDestination";
 import CreateTrip from "./CreateTrip";
+import Account from "./Account";
+import Settings from "./Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -60,6 +62,26 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateTrip />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Account Profile */}
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute>
+              <Account />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Settings & Specs */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
