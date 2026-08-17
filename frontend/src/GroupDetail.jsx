@@ -187,7 +187,9 @@ function GroupDetail() {
       csvContent += `\n"Optimal Settlement Plan"\n`;
       csvContent += `"From","To","Amount (INR)"\n`;
       settlement.forEach((s) => {
-        csvContent += `"${s.from}","${s.to}","INR ${s.amount.toFixed(2)}"\n`;
+        const fromName = `"${toTitleCase(s.fromName || s.fromUser?.name || s.from || "").replace(/"/g, '""')}"`;
+        const toName = `"${toTitleCase(s.toName || s.toUser?.name || s.to || "").replace(/"/g, '""')}"`;
+        csvContent += `${fromName},${toName},"INR ${Number(s.amount || 0).toFixed(2)}"\n`;
       });
     }
 
@@ -1509,12 +1511,16 @@ function GroupDetail() {
                 <div>
                   <h3 style={{ fontSize: "16px", marginBottom: "12px" }}>Optimal Debt Settlement Plan</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {settlement.map((s, idx) => (
-                      <div key={idx} style={{ padding: "10px 14px", background: "rgba(99, 102, 241, 0.1)", border: "1px solid rgba(99, 102, 241, 0.2)", borderRadius: "8px", display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-                        <div><strong>{toTitleCase(s.from)}</strong> owes <strong>{toTitleCase(s.to)}</strong></div>
-                        <div style={{ fontWeight: 700, color: "#818cf8" }}>{formatMoney(s.amount)}</div>
-                      </div>
-                    ))}
+                    {settlement.map((s, idx) => {
+                      const fromName = toTitleCase(s.fromName || s.fromUser?.name || s.from || "Member");
+                      const toName = toTitleCase(s.toName || s.toUser?.name || s.to || "Member");
+                      return (
+                        <div key={idx} style={{ padding: "10px 14px", background: "rgba(99, 102, 241, 0.1)", border: "1px solid rgba(99, 102, 241, 0.2)", borderRadius: "8px", display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                          <div><strong>{fromName}</strong> owes <strong>{toName}</strong></div>
+                          <div style={{ fontWeight: 700, color: "#818cf8" }}>{formatMoney(s.amount)}</div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
