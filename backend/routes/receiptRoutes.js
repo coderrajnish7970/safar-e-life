@@ -7,8 +7,8 @@ const protect = require("../middleware/authMiddleware");
 const router = express.Router();
 
 const upload = multer({
-  dest: "uploads/",
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  dest: "/tmp",
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
@@ -18,13 +18,14 @@ const upload = multer({
   },
 });
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 router.post("/scan", protect, upload.single("receipt"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No receipt image uploaded" });
     }
+
+    const apiKey = process.env.GEMINI_API_KEY || "fallback_key";
+    const genAI = new GoogleGenerativeAI(apiKey);
 
     const imageBuffer = fs.readFileSync(req.file.path);
     const imageBase64 = imageBuffer.toString("base64");
@@ -75,4 +76,4 @@ router.post("/scan", protect, upload.single("receipt"), async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router;
