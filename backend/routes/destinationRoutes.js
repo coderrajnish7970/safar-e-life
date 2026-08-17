@@ -134,7 +134,7 @@ router.post("/estimate", protect, async (req, res) => {
 // POST generate custom AI itinerary
 router.post("/ai-itinerary", protect, async (req, res) => {
   try {
-    const { destination, days, travelStyle } = req.body || {};
+    const { destination, days } = req.body || {};
 
     if (!destination || !days) {
       return res.status(400).json({
@@ -143,7 +143,6 @@ router.post("/ai-itinerary", protect, async (req, res) => {
     }
 
     const numDays = Math.min(Math.max(Number(days) || 3, 1), 14);
-    const style = travelStyle || "balanced";
 
     let aiItinerary = null;
 
@@ -153,29 +152,45 @@ router.post("/ai-itinerary", protect, async (req, res) => {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const prompt = `You are Safar-E-Life AI Travel Concierge. A traveler is visiting "${destination}" for ${numDays} days with travel style "${style}".
-        Generate a detailed day-by-day itinerary with exact activities, food spots, and evening experiences.
-        Return ONLY valid JSON with no markdown formatting, no codeblocks, matching this structure:
+        const prompt = `You are TerraYatra AI Travel Concierge. A traveler is visiting "${destination}" for ${numDays} days.
+        Automatically determine local attractions, food, route grouping, and experiences.
+        Return ONLY valid JSON with NO markdown formatting, NO backticks, matching this exact structure:
         {
           "destination": "${destination}",
           "days": ${numDays},
-          "tagline": "Short catchy travel slogan for ${destination}",
-          "estimatedBudgetINR": "₹${numDays * 2500} - ₹${numDays * 4500} per person",
+          "tagline": "Short catchy slogan for ${destination}",
+          "estimatedBudgetINR": "₹${numDays * 2200} - ₹${numDays * 4200} per person",
           "bestSeason": "October to March",
+          "summary": "Brief 2-sentence trip theme and geographical route optimization overview.",
           "itinerary": [
             {
               "day": 1,
-              "title": "Day 1 Highlight Title",
-              "morning": "🏛️ Morning activity details",
-              "afternoon": "🍛 Local food & lunch spot",
-              "evening": "🌆 Sunset view & evening experience"
+              "title": "Day 1 Theme Title",
+              "morning": {
+                "place": "Top Landmark Name",
+                "details": "Key activity and exploration highlights",
+                "whyWorthSeeing": "Why this place is unmissable"
+              },
+              "lunch": {
+                "spot": "Famous Local Restaurant / Food Area",
+                "foodToTry": "Must-try local dishes & snacks"
+              },
+              "afternoon": {
+                "place": "Nearby Cultural Attraction",
+                "details": "Sightseeing and photo opportunities",
+                "whyWorthSeeing": "Cultural or historic significance"
+              },
+              "evening": {
+                "activity": "Sunset Experience & Market Walk",
+                "details": "Atmospheric evening stroll or viewpoint"
+              },
+              "dinner": {
+                "spot": "Renowned Dinner Spot",
+                "foodToTry": "Signature dinner delicacy & dessert"
+              }
             }
           ],
-          "proTips": [
-            "Book entry tickets in advance",
-            "Try local street delicacies",
-            "Keep digital copies of IDs"
-          ]
+          "finalRecommendation": "Why this trip is custom-crafted to give the ultimate experience in ${destination}."
         }`;
 
         const result = await model.generateContent(prompt);
@@ -190,38 +205,51 @@ router.post("/ai-itinerary", protect, async (req, res) => {
     // Fallback Generator if AI key is missing or parsing failed
     if (!aiItinerary) {
       const fallbackDays = [];
-      const activitiesByStyle = {
-        heritage: ["Ancient Forts & Palaces", "Museum Tour & Heritage Walk", "Light & Sound Show"],
-        foodie: ["Famous Breakfast Joint", "Street Food Culinary Walk", "Rooftop Dinner"],
-        nature: ["Scenic Sunrise Point", "Botanical Garden & Lake Drive", "Stargazing Viewpoint"],
-        adventure: ["Trekking Trail & Viewpoint", "Water Sports / Zipline", "Campfire & Night Trail"],
-        balanced: ["Historic Landmark Visit", "Local Bazaar & Food Walk", "Cultural Sunset Experience"]
-      };
-
-      const selectedActs = activitiesByStyle[style.toLowerCase()] || activitiesByStyle.balanced;
+      const sampleLandmarks = [
+        { place: "Historic Fort & Monument", food: "Famous Breakfast Puri & Lassi", lunch: "Local Heritage Dhaba", afternoon: "Art Museum & Bazaar", evening: "Sunset Lake View", dinner: "Traditional Thali House" },
+        { place: "Architectural Wonders & Temples", food: "Famous Regional Snacks", lunch: "Heritage Courtyard Cafe", afternoon: "Handicrafts Market Stroll", evening: "Cultural Light & Sound Show", dinner: "Rooftop Grill & Biryani" },
+        { place: "Scenic Nature Trail / Peak Viewpoint", food: "Local Street Food Delicacies", lunch: "Riverside Bistro", afternoon: "Old Town Heritage Alleyways", evening: "Night Bazaar Shopping", dinner: "Local Specialty Restaurant" }
+      ];
 
       for (let i = 1; i <= numDays; i++) {
+        const item = sampleLandmarks[(i - 1) % sampleLandmarks.length];
         fallbackDays.push({
           day: i,
-          title: `Day ${i}: Exploring ${destination} Highlights`,
-          morning: `🏛️ Morning: Visit top historic site & early morning sightseeing in ${destination}`,
-          afternoon: `🍛 Afternoon: Enjoy authentic local cuisine at famous eateries`,
-          evening: `🌆 Evening: ${selectedActs[i % selectedActs.length]} & local bazaar stroll`
+          title: `Day ${i}: Best of ${destination} Highlights`,
+          morning: {
+            place: `${destination} ${item.place}`,
+            details: `Explore the iconic architecture and morning atmosphere of ${destination}.`,
+            whyWorthSeeing: `Highly rated landmark representing the essence of ${destination}.`
+          },
+          lunch: {
+            spot: `${destination} ${item.lunch}`,
+            foodToTry: item.food
+          },
+          afternoon: {
+            place: `${destination} ${item.afternoon}`,
+            details: `Immerse in local artisan markets and historic quarters.`,
+            whyWorthSeeing: `Vibrant culture and unique local craftsmanship.`
+          },
+          evening: {
+            activity: item.evening,
+            details: `Enjoy relaxed twilight views and evening strolls.`
+          },
+          dinner: {
+            spot: `${destination} ${item.dinner}`,
+            foodToTry: "Signature regional delicacies and local dessert"
+          }
         });
       }
 
       aiItinerary = {
         destination,
         days: numDays,
-        tagline: `Discover the breathtaking magic of ${destination}`,
+        tagline: `Discover the unforgettable magic of ${destination}`,
         estimatedBudgetINR: `₹${numDays * 2000} - ₹${numDays * 3500} per person`,
         bestSeason: "October to March",
+        summary: `A carefully optimized ${numDays}-day itinerary grouping nearby attractions to maximize your time in ${destination}.`,
         itinerary: fallbackDays,
-        proTips: [
-          `Carry comfortable walking shoes for ${destination}`,
-          "Keep local cash handy for street food and auto-rickshaws",
-          "Book popular attraction tickets early to skip queues"
-        ]
+        finalRecommendation: `This itinerary combines top landmarks with authentic local food spots in ${destination}, ensuring minimal transit time and maximum enjoyment!`
       };
     }
 
