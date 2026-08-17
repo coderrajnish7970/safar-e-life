@@ -2,6 +2,7 @@
   "name": "safar-e-life",
   "version": "1.0.0",
   "private": true,
+  "type": "commonjs",
   "main": "api/index.js",
   "scripts": {
     "build": "npm install && cd frontend && npm install && npm run build"
