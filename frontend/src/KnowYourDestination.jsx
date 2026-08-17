@@ -10,8 +10,27 @@ function KnowYourDestination() {
   const [destinations, setDestinations] = useState([]);
   const [selected, setSelected] = useState("");
   const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const categoryPills = [
+    { label: "All 🇮🇳 (100)", value: "All" },
+    { label: "Top 20 Flagship ⭐", value: "Flagship" },
+    { label: "Heritage 🏛️", value: "Heritage" },
+    { label: "Beach 🏖️", value: "Beach" },
+    { label: "Spiritual 🛕", value: "Spiritual" },
+    { label: "Mountains 🏔️", value: "Mountains" },
+    { label: "Wildlife 🐅", value: "Wildlife" },
+    { label: "Desert 🏜️", value: "Desert" },
+    { label: "Nature 🌿", value: "Nature" },
+  ];
+
+  const flagshipNames = [
+    "Agra", "Jaipur", "Goa", "Varanasi", "Manali", "Leh", "Srinagar", "Udaipur",
+    "Amritsar", "Kochi", "Rishikesh", "Darjeeling", "Munnar", "Jaisalmer", "Hampi",
+    "Andaman Islands", "Ooty", "Shillong", "Alappuzha", "Pahalgam"
+  ];
 
   const fetchDestinations = async () => {
     try {
@@ -39,19 +58,30 @@ function KnowYourDestination() {
   }, []);
 
   const filteredDestinations = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    let result = destinations;
 
-    if (!query) {
-      return destinations;
+    if (activeCategory === "Flagship") {
+      result = result.filter((d) => flagshipNames.includes(d.name));
+    } else if (activeCategory !== "All") {
+      result = result.filter((d) => {
+        const desc = (d.description || "").toLowerCase();
+        const best = (d.bestFor || []).join(" ").toLowerCase();
+        const cat = activeCategory.toLowerCase();
+        return desc.includes(cat) || best.includes(cat);
+      });
     }
 
-    return destinations.filter((destination) => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      return result;
+    }
+
+    return result.filter((destination) => {
       const name = destination.name?.toLowerCase() || "";
       const state = destination.state?.toLowerCase() || "";
-
       return name.includes(query) || state.includes(query);
     });
-  }, [destinations, search]);
+  }, [destinations, search, activeCategory]);
 
   const selectedDestination = destinations.find(
     (destination) => destination.name === selected
@@ -114,6 +144,47 @@ function KnowYourDestination() {
             marginBottom: "24px",
           }}
         >
+          {/* CATEGORY PILLS */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              overflowX: "auto",
+              paddingBottom: "12px",
+              marginBottom: "16px",
+              scrollbarWidth: "none",
+            }}
+          >
+            {categoryPills.map((pill) => {
+              const isActive = activeCategory === pill.value;
+              return (
+                <button
+                  key={pill.value}
+                  type="button"
+                  onClick={() => setActiveCategory(pill.value)}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: "20px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    whiteSpace: "nowrap",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    background: isActive
+                      ? "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)"
+                      : "rgba(255, 255, 255, 0.05)",
+                    color: isActive ? "#ffffff" : "#94a3b8",
+                    border: isActive
+                      ? "1px solid #818cf8"
+                      : "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+
           <label
             style={{
               display: "block",
