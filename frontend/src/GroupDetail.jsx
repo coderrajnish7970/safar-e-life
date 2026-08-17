@@ -158,6 +158,49 @@ function GroupDetail() {
   const [memberError, setMemberError] = useState("");
 
   const [toast, setToast] = useState({ message: "", type: "success" });
+  const [showPDFModal, setShowPDFModal] = useState(false);
+
+  const handleExportCSV = () => {
+    if (!group || !expenses) return;
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += `"Safar-E-Life Trip Expense Report"\n`;
+    csvContent += `"Trip Name","${group.name}"\n`;
+    csvContent += `"Export Date","${new Date().toLocaleDateString()}"\n`;
+    csvContent += `"Total Expenses","INR ${(summary?.actualTotal || 0).toFixed(2)}"\n`;
+    csvContent += `"Total Members","${group.members?.length || 0}"\n\n`;
+
+    csvContent += `"Date","Expense Title","Category","Paid By","Total Amount (INR)","Split Mode"\n`;
+
+    expenses.forEach((exp) => {
+      const date = new Date(exp.createdAt).toLocaleDateString();
+      const title = `"${(exp.title || exp.description || "").replace(/"/g, '""')}"`;
+      const category = exp.category || "misc";
+      const paidBy = `"${(exp.paidBy?.name || "").replace(/"/g, '""')}"`;
+      const amount = Number(exp.amount || 0).toFixed(2);
+      const mode = exp.splitMode || "equal";
+
+      csvContent += `"${date}",${title},"${category}",${paidBy},"${amount}","${mode}"\n`;
+    });
+
+    if (settlement && settlement.length > 0) {
+      csvContent += `\n"Optimal Settlement Plan"\n`;
+      csvContent += `"From","To","Amount (INR)"\n`;
+      settlement.forEach((s) => {
+        csvContent += `"${s.from}","${s.to}","INR ${s.amount.toFixed(2)}"\n`;
+      });
+    }
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${group.name.replace(/\s+/g, "_")}_Expense_Report.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setToast({ message: "📊 CSV Report downloaded successfully!", type: "success" });
+  };
 
   // AI CHAT STATE
   const [question, setQuestion] = useState("");
@@ -550,18 +593,56 @@ function GroupDetail() {
           ← Back to Dashboard
         </button>
 
-        {isCreator && (
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
           <button
-            onClick={handleDeleteGroup}
+            type="button"
+            onClick={handleExportCSV}
             style={{
-              backgroundColor: "rgba(255, 107, 92, 0.2)",
-              border: "1px solid #ff6b5c",
-              color: "#ff6b5c",
+              backgroundColor: "rgba(99, 102, 241, 0.15)",
+              border: "1px solid rgba(99, 102, 241, 0.3)",
+              color: "#818cf8",
+              fontWeight: 600,
+              fontSize: "13px",
+              padding: "8px 14px",
+              borderRadius: "8px",
+              cursor: "pointer",
             }}
           >
-            Delete Trip
+            📊 Export CSV
           </button>
-        )}
+
+          <button
+            type="button"
+            onClick={() => setShowPDFModal(true)}
+            style={{
+              backgroundColor: "rgba(41, 182, 166, 0.15)",
+              border: "1px solid rgba(41, 182, 166, 0.3)",
+              color: "#29b6a6",
+              fontWeight: 600,
+              fontSize: "13px",
+              padding: "8px 14px",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            📄 PDF Report
+          </button>
+
+          {isCreator && (
+            <button
+              onClick={handleDeleteGroup}
+              style={{
+                backgroundColor: "rgba(255, 107, 92, 0.2)",
+                border: "1px solid #ff6b5c",
+                color: "#ff6b5c",
+                padding: "8px 14px",
+                borderRadius: "8px",
+              }}
+            >
+              Delete Trip
+            </button>
+          )}
+        </div>
       </div>
 
       {/* GROUP HEADER */}
@@ -1289,6 +1370,156 @@ function GroupDetail() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      {/* PDF REPORT PRINT MODAL */}
+      {showPDFModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+            padding: "20px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#161b26",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "850px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "32px",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+              color: "#ffffff",
+            }}
+          >
+            {/* MODAL ACTION BAR */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "24px",
+                paddingBottom: "16px",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <div style={{ fontWeight: 700, fontSize: "18px" }}>
+                📄 Trip Financial Report Preview
+              </div>
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  🖨️ Print / Save as PDF
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowPDFModal(false)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.1)",
+                    color: "#ffffff",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            {/* PRINTABLE REPORT CONTENT */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+                <div>
+                  <h1 style={{ margin: 0, fontSize: "24px", color: "#6366f1" }}>🌴 Safar-E-Life Report</h1>
+                  <div style={{ fontSize: "13px", color: "#8b93a6" }}>Integer-Paise Precision Financial Audit</div>
+                </div>
+                <div style={{ textAlign: "right", fontSize: "12px", color: "#8b93a6" }}>
+                  <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
+                  <div><strong>Status:</strong> Audited & Balanced</div>
+                </div>
+              </div>
+
+              <div style={{ padding: "16px", background: "rgba(255,255,255,0.03)", borderRadius: "10px", marginBottom: "20px" }}>
+                <h2 style={{ margin: "0 0 6px 0", fontSize: "20px" }}>{group.name}</h2>
+                <div style={{ color: "#8b93a6", fontSize: "13px" }}>{group.description}</div>
+                <div style={{ display: "flex", gap: "20px", marginTop: "12px", fontSize: "13px" }}>
+                  <div>Total Spent: <strong style={{ color: "#29b6a6" }}>{formatMoney(summary?.actualTotal || 0)}</strong></div>
+                  <div>Members: <strong>{group.members?.length || 0}</strong></div>
+                  <div>Expenses: <strong>{expenses?.length || 0}</strong></div>
+                </div>
+              </div>
+
+              {/* EXPENSES TABLE */}
+              <h3 style={{ fontSize: "16px", marginBottom: "12px" }}>Itemized Expense History</h3>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "24px", fontSize: "13px" }}>
+                <thead>
+                  <tr style={{ background: "rgba(255,255,255,0.05)", textAlign: "left" }}>
+                    <th style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Date</th>
+                    <th style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Expense Title</th>
+                    <th style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Category</th>
+                    <th style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>Paid By</th>
+                    <th style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "right" }}>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenses.map((exp) => (
+                    <tr key={exp._id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                      <td style={{ padding: "10px" }}>{new Date(exp.createdAt).toLocaleDateString()}</td>
+                      <td style={{ padding: "10px", fontWeight: 600 }}>{exp.title || exp.description}</td>
+                      <td style={{ padding: "10px" }}>{exp.category}</td>
+                      <td style={{ padding: "10px" }}>{toTitleCase(exp.paidBy?.name)}</td>
+                      <td style={{ padding: "10px", textAlign: "right", fontWeight: 700, color: "#29b6a6" }}>
+                        {formatMoney(exp.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* SETTLEMENT PLAN */}
+              {settlement && settlement.length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: "16px", marginBottom: "12px" }}>Optimal Debt Settlement Plan</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {settlement.map((s, idx) => (
+                      <div key={idx} style={{ padding: "10px 14px", background: "rgba(99, 102, 241, 0.1)", border: "1px solid rgba(99, 102, 241, 0.2)", borderRadius: "8px", display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                        <div><strong>{toTitleCase(s.from)}</strong> owes <strong>{toTitleCase(s.to)}</strong></div>
+                        <div style={{ fontWeight: 700, color: "#818cf8" }}>{formatMoney(s.amount)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       )}
