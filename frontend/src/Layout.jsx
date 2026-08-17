@@ -32,6 +32,11 @@ function Layout({ children }) {
       icon: "🏠",
     },
     {
+      label: "AI Travel Assistant",
+      path: "/ai-assistant",
+      icon: "🤖",
+    },
+    {
       label: "Know Your Destination",
       path: "/know-destination",
       icon: "🌍",

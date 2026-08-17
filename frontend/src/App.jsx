@@ -13,6 +13,7 @@ import KnowYourDestination from "./KnowYourDestination";
 import CreateTrip from "./CreateTrip";
 import Account from "./Account";
 import Settings from "./Settings";
+import AITravelAssistant from "./AITravelAssistant";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -32,6 +33,16 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* AI Travel Assistant */}
+        <Route
+          path="/ai-assistant"
+          element={
+            <ProtectedRoute>
+              <AITravelAssistant />
             </ProtectedRoute>
           }
         />
